@@ -4,11 +4,7 @@
 
 // Constructor/Destructor
 JSValue glfw_position_ctor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv) {
-  GLFWPosition* position;
-  JSValue obj = JS_UNDEFINED;
-  JSValue proto;
-  
-  position = js_mallocz(ctx, sizeof(*position));
+  GLFWPosition* position = js_mallocz(ctx, sizeof(*position));
   if (!position) return JS_EXCEPTION;
 
   if (JS_ToInt32(ctx, &position->x, argv[0]))
@@ -17,22 +13,9 @@ JSValue glfw_position_ctor(JSContext* ctx, JSValueConst new_target, int argc, JS
   if (JS_ToInt32(ctx, &position->y, argv[1]))
     goto fail;
 
-  /* using new_target to get the prototype is necessary when the
-      class is extended. */
-  proto = JS_GetPropertyStr(ctx, new_target, "prototype");
-  if (JS_IsException(proto))
-    goto fail;
-
-  obj = JS_NewObjectProtoClass(ctx, proto, glfw_position_class_id);
-  JS_FreeValue(ctx, proto);
-  if (JS_IsException(obj))
-    goto fail;
-
-  JS_SetOpaque(obj, position);
-  return obj;
+  return glfw_position_new_instance(ctx, position);
  fail:
   js_free(ctx, position);
-  JS_FreeValue(ctx, obj);
   return JS_EXCEPTION;
 }
 
@@ -94,6 +77,27 @@ JSValue glfw_position_constructor(JSContext* ctx) {
   }
 
   return glfw_position_class;
+}
+
+JSValue glfw_position_new_instance(JSContext* ctx, GLFWPosition* position) {
+  JSValue obj = JS_UNDEFINED;
+  JSValue proto;
+
+  proto = JS_GetPropertyStr(ctx, glfw_position_constructor(ctx), "prototype");
+  if (JS_IsException(proto))
+    goto fail;
+
+  obj = JS_NewObjectProtoClass(ctx, proto, glfw_position_class_id);
+  JS_FreeValue(ctx, proto);
+  if (JS_IsException(obj))
+    goto fail;
+
+  JS_SetOpaque(obj, position);
+
+  return obj;
+ fail:
+  JS_FreeValue(ctx, obj);
+  return JS_EXCEPTION;
 }
 
 int glfw_position_init(JSContext* ctx, JSModuleDef* m) {

@@ -2,6 +2,7 @@
 #include "position.h"
 #include "size.h"
 #include "window.h"
+#include "monitor.h"
 
 // 
 // Top-level
@@ -147,6 +148,7 @@ int glfw_init(JSContext* ctx, JSModuleDef* m) {
   glfw_position_init(ctx, m);
   glfw_size_init(ctx, m);
   glfw_window_init(ctx, m);
+  glfw_monitor_init(ctx, m);
 
   // TODO: lazy-load version info with a getter?
   int major, minor, revision;
@@ -166,7 +168,10 @@ int glfw_export(JSContext* ctx, JSModuleDef* m) {
   glfw_position_export(ctx, m);
   glfw_size_export(ctx, m);
   glfw_window_export(ctx, m);
+  glfw_monitor_export(ctx, m);
+
   JS_AddModuleExport(ctx, m, "version");
+
   return 0;
 }
 

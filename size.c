@@ -87,13 +87,34 @@ JSValue glfw_size_constructor(JSContext* ctx) {
     glfw_size_proto = JS_NewObject(ctx);
     JS_SetPropertyFunctionList(ctx, glfw_size_proto, glfw_size_proto_funcs, countof(glfw_size_proto_funcs));
     JS_SetClassProto(ctx, glfw_size_class_id, glfw_size_proto);
-    
+
     glfw_size_class = JS_NewCFunction2(ctx, glfw_size_ctor, "Size", 2, JS_CFUNC_constructor, 0);
     /* set proto.constructor and ctor.prototype */
     JS_SetConstructor(ctx, glfw_size_class, glfw_size_proto);
   }
 
   return glfw_size_class;
+}
+
+JSValue glfw_size_new_instance(JSContext* ctx, GLFWSize* size) {
+  JSValue obj = JS_UNDEFINED;
+  JSValue proto;
+
+  proto = JS_GetPropertyStr(ctx, glfw_size_constructor(ctx), "prototype");
+  if (JS_IsException(proto))
+    goto fail;
+
+  obj = JS_NewObjectProtoClass(ctx, proto, glfw_size_class_id);
+  JS_FreeValue(ctx, proto);
+  if (JS_IsException(obj))
+    goto fail;
+
+  JS_SetOpaque(obj, size);
+
+  return obj;
+ fail:
+  JS_FreeValue(ctx, obj);
+  return JS_EXCEPTION;
 }
 
 int glfw_size_init(JSContext* ctx, JSModuleDef* m) {
